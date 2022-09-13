@@ -30,7 +30,7 @@ function renderChampion(champion, index) {
   return (
     <Champion
       key={index}
-      img={`http://ddragon.leagueoflegends.com/cdn/11.16.1/img/champion/${champion.nome}.png`}
+      img={`https://raw.githubusercontent.com/dneto/lor-tournament-analytics/master/apps/web/public/assets/imgs/champions/cropped/${champion.nome}-cropped.png`}
     >
       {champion.qtd}
     </Champion>

@@ -15,8 +15,8 @@
     "react-dom": "^16.14.0",
     "react-icons": "^3.11.0",
     "react-router-dom": "^5.2.0",
-    "react-scripts": "^4.0.3",
-    "runeterra": "git+https://github.com/chrysomallos/runeterra.git#bandle-city",
+    "react-scripts": "^5.0.1",
+    "runeterra": "https://github.com/dneto/runeterra#ignoreFormatOnDecode",
     "styled-components": "^5.2.1"
   },
   "scripts": {
@@ -39,5 +39,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "vercel": "^27.1.5"
   }
 }

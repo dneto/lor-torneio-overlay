@@ -1,17 +1,16 @@
-import React from 'react';
-import { DeckEncoder } from 'runeterra';
-import CSVReader from 'react-csv-reader';
-import { GrDocumentCsv } from 'react-icons/gr';
+import React from "react";
+import { DeckEncoder } from "runeterra";
+import CSVReader from "react-csv-reader";
+import { GrDocumentCsv } from "react-icons/gr";
 
-import { useSaveState } from '../../../../context/SaveState';
+import { useSaveState } from "../../../../context/SaveState";
 
-import { Importar } from './style';
+import { Importar } from "./style";
 
-import factions from '../../../../assets/factions.json';
-import champions from '../../../../assets/champions.json';
+import factions from "../../../../assets/factions.json";
+import champions from "../../../../assets/champions.json";
 
 const ImportacaoParticipantes = ({ regraFuncao, funcaoErro }) => {
-
   const { saveState, setSaveState } = useSaveState();
   const { regra, times } = saveState;
 
@@ -49,8 +48,14 @@ const ImportacaoParticipantes = ({ regraFuncao, funcaoErro }) => {
 
   function validaJogador(jogador) {
     const [nome, time, deck1, deck2, deck3] = jogador;
-    return validaNome(nome) && validaTime(time) && validaDeck(deck1) && validaDeck(deck2) &&
-      validaDeck(deck3) && validaDecks([deck1, deck2, deck3]);
+    return (
+      validaNome(nome) &&
+      validaTime(time) &&
+      validaDeck(deck1) &&
+      validaDeck(deck2) &&
+      validaDeck(deck3) &&
+      validaDecks([deck1, deck2, deck3])
+    );
   }
 
   function pegaRegioes(cards) {
@@ -58,14 +63,17 @@ const ImportacaoParticipantes = ({ regraFuncao, funcaoErro }) => {
     cards.forEach((card) => {
       const region = card.faction.shortCode;
       if (!cardsPerRegion.hasOwnProperty(region)) {
-        cardsPerRegion[region] = 0
+        cardsPerRegion[region] = 0;
       }
-      cardsPerRegion[region] = cardsPerRegion[region] += 1
+      cardsPerRegion[region] = cardsPerRegion[region] += 1;
     });
 
-    let allRegions = Object.keys(cardsPerRegion).map((region) => [region, cardsPerRegion[region]]);
+    let allRegions = Object.keys(cardsPerRegion).map((region) => [
+      region,
+      cardsPerRegion[region],
+    ]);
     let deckRegions = allRegions
-      .sort((a, b) => (b[1] - a[1]))
+      .sort((a, b) => b[1] - a[1])
       .slice(0, 2)
       .map((region) => factions[region[0]]);
 
@@ -77,8 +85,9 @@ const ImportacaoParticipantes = ({ regraFuncao, funcaoErro }) => {
     cards.forEach((card) => {
       if (champions[card.code] !== undefined) {
         campeoes.push({
-          nome: champions[card.code],
-          qtd: card.count
+          nome: card.code,
+          regiao: factions[card.faction.shortCode],
+          qtd: card.count,
         });
       }
     });
@@ -87,13 +96,24 @@ const ImportacaoParticipantes = ({ regraFuncao, funcaoErro }) => {
   }
 
   function converteNome(nome) {
-    return nome.split('#')[0];
+    return nome.split("#")[0];
   }
 
   function converteDeck(codigo) {
     try {
       const cards = DeckEncoder.decode(codigo);
-      return { code: codigo, cards: cards, regions: pegaRegioes(cards), champions: pegaCampeoes(cards) };
+      let champions = pegaCampeoes(cards);
+      let regions = pegaRegioes(cards);
+
+      if (champions.find((c) => c.regiao === "runeterra")) {
+        regions = regions.slice(0, 1);
+      }
+      return {
+        code: codigo,
+        cards: cards,
+        regions: regions,
+        champions: champions,
+      };
     } catch {
       return undefined;
     }
@@ -104,25 +124,27 @@ const ImportacaoParticipantes = ({ regraFuncao, funcaoErro }) => {
     const decks = [
       converteDeck(deck1),
       converteDeck(deck2),
-      converteDeck(deck3)
+      converteDeck(deck3),
     ];
     return {
       nome: converteNome(nome),
-      time: time ? buscaTime(time) : { nome: '', url_logo: '' },
+      time: time ? buscaTime(time) : { nome: "", url_logo: "" },
       decks: decks.map((deck) => {
         return {
           code: deck.code,
           regions: deck.regions,
-          champions: deck.champions
-        }
-      })
+          champions: deck.champions,
+        };
+      }),
     };
   }
 
   function geraLinkDetalhes(deck1, deck2, deck3) {
-    return `https://xtecna.github.io/lor-deck-checker/index.html?` +
+    return (
+      `https://xtecna.github.io/lor-deck-checker/index.html?` +
       `regra=${regra.toLowerCase()}&singleton=false` +
-      `&deck1=${deck1}&deck2=${deck2}&deck3=${deck3}`;
+      `&deck1=${deck1}&deck2=${deck2}&deck3=${deck3}`
+    );
   }
 
   function importarJogadores(data) {
@@ -136,40 +158,52 @@ const ImportacaoParticipantes = ({ regraFuncao, funcaoErro }) => {
 
       let erro = `Jogador ${index + 1} `;
       if (!validaNome(nome)) {
-        erro += 'tem nome inválido.';
+        erro += "tem nome inválido.";
       } else if (!validaTime(time)) {
-        erro += 'está num time que não existe.';
+        erro += "está num time que não existe.";
       } else if (!validaDeck(deck1)) {
-        erro += 'tem deck 1 inválido.';
+        erro += "tem deck 1 inválido.";
       } else if (!validaDeck(deck2)) {
-        erro += 'tem deck 2 inválido.';
+        erro += "tem deck 2 inválido.";
       } else if (!validaDeck(deck3)) {
-        erro += 'tem deck 3 inválido.';
+        erro += "tem deck 3 inválido.";
       } else if (!validaDeck([deck1, deck2, deck3])) {
-        erro += 'tem decks que não seguem a regra estabelecida.';
+        erro += "tem decks que não seguem a regra estabelecida.";
         detalhes = true;
       } else {
-        erro += 'não possui todas as informações em sua linha (faltando nome, time ou um dos decks).';
+        erro +=
+          "não possui todas as informações em sua linha (faltando nome, time ou um dos decks).";
       }
 
-      if (detalhes) erros.push({ mensagem: erro, detalhes: geraLinkDetalhes(deck1, deck2, deck3) });
+      if (detalhes)
+        erros.push({
+          mensagem: erro,
+          detalhes: geraLinkDetalhes(deck1, deck2, deck3),
+        });
       else erros.push({ mensagem: erro });
 
       return false;
     });
-    jogadoresValidos = jogadoresValidos.map((jogador) => converteJogador(jogador));
+    jogadoresValidos = jogadoresValidos.map((jogador) =>
+      converteJogador(jogador)
+    );
     setSaveState({ ...saveState, jogadores: jogadoresValidos });
     funcaoErro(erros);
-    document.getElementsByClassName('csv-input')[0].value = '';
+    document.getElementsByClassName("csv-input")[0].value = "";
   }
 
   return (
     <Importar>
-      <label htmlFor="csv-input-jogador"><GrDocumentCsv />Importar jogadores:</label>
-      <CSVReader parserOptions={{ header: false }}
-        onFileLoaded={(data) => importarJogadores(data)} />
+      <label htmlFor="csv-input-jogador">
+        <GrDocumentCsv />
+        Importar jogadores:
+      </label>
+      <CSVReader
+        parserOptions={{ header: false }}
+        onFileLoaded={(data) => importarJogadores(data)}
+      />
     </Importar>
   );
-}
+};
 
 export default ImportacaoParticipantes;

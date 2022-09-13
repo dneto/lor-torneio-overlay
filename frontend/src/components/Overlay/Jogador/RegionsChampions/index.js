@@ -25,7 +25,7 @@ function renderChampion(champion, index, number_champions) {
       className="champion"
       key={index}
       lotado={number_champions > 4}
-      img={`http://ddragon.leagueoflegends.com/cdn/11.16.1/img/champion/${champion.nome}.png`}
+      img={`https://raw.githubusercontent.com/dneto/lor-tournament-analytics/master/apps/web/public/assets/imgs/champions/cropped/${champion.nome}-cropped.png`}
       alt={champion.nome}
     >
       {champion.qtd}

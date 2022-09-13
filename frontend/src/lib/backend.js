@@ -13,9 +13,8 @@ const create = async (data) => {
       },
       data: data,
     });
-    if (response.status != 200) {
-      throw new Error("Could not create session", id);
-    }
+
+    return response.data;
   } else {
     throw emptyBackendError;
   }
@@ -28,8 +27,11 @@ const findOne = async (id) => {
       url: `${backend}/${id}`,
     });
 
-    if (response.status != 200) {
-      throw new Error("Could not retrieve id", id);
+    if (response.status !== 200) {
+      if (response.status === 404) {
+        throw new Error("O ID passado não corresponde a um registro válido.");
+      }
+      throw new Error("Ocorreu um erro");
     }
 
     return response.data;
@@ -42,16 +44,20 @@ const update = async (id, data) => {
   if (backend && backend.length > 0) {
     const response = await axios({
       method: "put",
-      url: `${backend}/${idServidor}`,
+      url: `${backend}/${id}`,
       headers: {
         "Content-Type": "application/json",
       },
       data: data,
     });
 
-    if (response.status != 200) {
-      throw new Error("Could not retrieve id", id);
+    if (response.status !== 200) {
+      if (response.status === 404) {
+        throw new Error("O ID passado não corresponde a um registro válido.");
+      }
+      throw new Error("Ocorreu um erro");
     }
+    return response.data;
   } else {
     throw emptyBackendError;
   }
