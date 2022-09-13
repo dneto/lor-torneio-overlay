@@ -1,0 +1,35 @@
+version: "3"
+
+services:
+  backend:
+    build:
+      dockerfile: Dockerfile
+      context: backend
+    volumes:
+      - "./backend:/lor-torneio-overlay"
+    environment:
+      MONGODB_URI: mongodb://root:pass@mongo:27017/overlay?authSource=admin
+      PORT: 8090
+    ports:
+      - 8090:8090
+  frontend:
+    build:
+      dockerfile: Dockerfile
+      context: frontend
+    ports:
+      - 3000:3000
+    volumes:
+      - "./frontend:/lor-torneio-overlay"
+    environment:
+      - REACT_APP_BACKEND_URI=http://localhost:8090
+  mongo:
+    image: mongo
+    restart: always
+    ports:
+      - 27017:27017
+    volumes:
+    - ./init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: pass
+      MONGO_INITDB_DATABASE: overlay
